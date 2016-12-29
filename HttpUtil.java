@@ -361,10 +361,4 @@ public class HttpUtil {
 
     }
 
-    public static void main(String[] args) {
-        HttpUtil openWeb = new HttpUtil();
-        String tempHtml = openWeb.doGet("http://www.jd.com");
-        System.out.println(tempHtml);
-    }
-
 }
