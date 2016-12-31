@@ -358,7 +358,6 @@ public class HttpUtil {
             e.printStackTrace();
         }
         return result;
-
     }
 
 }
