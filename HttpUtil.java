@@ -9,10 +9,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import com.alibaba.fastjson.JSONObject;
 import org.apache.http.*;
@@ -40,6 +37,10 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 import java.net.URLEncoder;
 
 import javax.net.ssl.*;
@@ -50,7 +51,7 @@ import javax.net.ssl.*;
 public class HttpUtil {
     private static PoolingHttpClientConnectionManager cm;
     private RequestConfig requestConfig;
-    private final static int defaultTimeout = 30000;
+    private final static int defaultTimeout = 240000;
     private String EMPTY_STR = "";
     private CloseableHttpClient httpClient;
     private HttpHost proxy;
@@ -228,7 +229,7 @@ public class HttpUtil {
                 if (j > 3) {
                     break;
                 }
-
+                request.releaseConnection();
                 if (proxy == null) {
                     response = httpClient.execute(request);
                     Thread.sleep(sleepTime);
@@ -246,7 +247,8 @@ public class HttpUtil {
                 String result = EntityUtils.toString(response.getEntity(), responseEncoding);
                 return result;
             } else {
-                return "HTTPSTATUS_ERROR:" + statusCode;
+                String result = EntityUtils.toString(response.getEntity(), responseEncoding);
+                return "HTTPSTATUS_ERROR:" + statusCode + "::::" + result;
             }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
@@ -358,6 +360,30 @@ public class HttpUtil {
             e.printStackTrace();
         }
         return result;
+
+    }
+        String test = "12345678" + "" + "" + timestamp;
+        StringBuilder localStringBuilder;
+        try {
+            byte[] arrayOfByte = MessageDigest.getInstance("MD5").digest(test.getBytes("UTF-8"));
+            localStringBuilder = new StringBuilder(2 * arrayOfByte.length);
+            int i = arrayOfByte.length;
+            for (int j = 0; j < i; j++) {
+                int k = arrayOfByte[j];
+                if ((k & 0xFF) < 16)
+                    localStringBuilder.append("0");
+                localStringBuilder.append(Integer.toHexString(k & 0xFF));
+            }
+        } catch (NoSuchAlgorithmException localNoSuchAlgorithmException) {
+            throw new RuntimeException("MD5 should not be supported!", localNoSuchAlgorithmException);
+        } catch (UnsupportedEncodingException localUnsupportedEncodingException) {
+            throw new RuntimeException("UTF-8 should not be supported!", localUnsupportedEncodingException);
+        }
+        return localStringBuilder.toString().toUpperCase();
+    }
+
+    public static void main(String[] args) {
+
     }
 
 }
